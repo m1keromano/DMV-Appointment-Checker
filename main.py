@@ -1,0 +1,1 @@
+# This script will take the logic from the debug script and then email the results to me. 
