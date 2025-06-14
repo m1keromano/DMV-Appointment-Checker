@@ -13,11 +13,11 @@ import os
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
 
-# --- Configuration ---
+# Configuration 
 DMV_URL = "https://skiptheline.ncdot.gov/Webapp/Appointment/Index/a7ade79b-996d-4971-8766-97feb75254de"
 LAST_APPOINTMENTS_FILE = "last_appointments.json"
 
-# --- Notification Function (Prints to Terminal in this debug mode) ---
+# Notification Function (Prints to Terminal in this debug mode) 
 def debug_print_notification(subject, body):
     """
     Prints the notification subject and body to the terminal for debugging purposes.
@@ -28,7 +28,7 @@ def debug_print_notification(subject, body):
     print(f"BODY:\n{body}")
     print("="*50 + "\n")
 
-# --- Date Scraping Helper ---
+# Date Scraping Helper
 def scrape_dates_from_office_detail_page(driver, office_name, end_date_filter):
     
     appointments_for_office = set()
@@ -36,17 +36,16 @@ def scrape_dates_from_office_detail_page(driver, office_name, end_date_filter):
 
     print(f"  Attempting to scrape dates for '{office_name}'...")
     try:
-        # 1. Wait for the calendar table to load 
+        # Wait for the calendar table to load 
         calendar_table = WebDriverWait(driver, 15).until(
             EC.presence_of_element_located((By.CLASS_NAME, "ui-datepicker-calendar"))
         )
         print(f"  Calendar for '{office_name}' loaded.")
 
-        # 2. Find all selectable days in the current calendar view
+        # Find all selectable days in the current calendar view
         available_day_elements = calendar_table.find_elements(By.XPATH, ".//td[contains(@data-handler, 'selectDay') and not(contains(@class, 'ui-datepicker-unselectable')) and .//a]")
         print(f"  Found {len(available_day_elements)} selectable days in calendar for '{office_name}'.")
 
-        # Collect day details before clicking to avoid StaleElementReferenceException
         days_to_process = []
         for day_el in available_day_elements:
             try:
@@ -69,7 +68,7 @@ def scrape_dates_from_office_detail_page(driver, office_name, end_date_filter):
 
             current_calendar_date = datetime.date(day_year, day_month, day_num)
 
-            # Filter days by "next month" criteria 
+            # Filter days based on user criteria
             if not (today <= current_calendar_date <= end_date_filter):
                 print(f"    Day {current_calendar_date.strftime('%Y-%m-%d')} for '{office_name}' is outside filter. Skipping.")
                 continue
@@ -83,7 +82,7 @@ def scrape_dates_from_office_detail_page(driver, office_name, end_date_filter):
                     EC.presence_of_element_located((By.CLASS_NAME, "ui-datepicker-calendar"))
                 )
                 
-                clickable_day = WebDriverWait(calendar_table_rechecked, 5).until( # Search within the rechecked table
+                clickable_day = WebDriverWait(calendar_table_rechecked, 5).until( 
                     EC.element_to_be_clickable((By.XPATH, day_xpath))
                 )
                 
@@ -91,8 +90,7 @@ def scrape_dates_from_office_detail_page(driver, office_name, end_date_filter):
                 print(f"    Clicked day {day_num} for '{office_name}'.")
                 time.sleep(1) # Small pause for time slots to load
 
-                # --- Scrape time slots from the dropdown ---
-                # Find the select element using its unique parent container classes.
+                # Scrape time slots from the dropdown 
                 time_select_container = WebDriverWait(driver, 5).until(
                     EC.presence_of_element_located((By.CSS_SELECTOR, "div.step-control-content.AppointmentTime.TimeSlotDataControl"))
                 )
@@ -109,10 +107,8 @@ def scrape_dates_from_office_detail_page(driver, office_name, end_date_filter):
                     datetime_str = option_el.get_attribute("data-datetime")
                     if datetime_str: 
                         try:
-                            # Parse the 'M/D/YYYY HH:MM:SS AM/PM' format
                             full_appointment_datetime = datetime.datetime.strptime(datetime_str, "%m/%d/%Y %I:%M:%S %p")
                             
-                            # Final check: Filter by time period criteria 
                             if today <= full_appointment_datetime.date() <= end_date_filter:
                                 formatted_time = full_appointment_datetime.strftime('%Y-%m-%d %I:%M %p')
                                 appointments_for_office.add(f"{office_name} - {formatted_time}")
@@ -138,22 +134,8 @@ def scrape_dates_from_office_detail_page(driver, office_name, end_date_filter):
     return appointments_for_office
 
 
-# --- Web Scraping Function ---
+# Web Scraping Function 
 def get_available_appointments(driver):
-    """
-    Orchestrates the scraping process:
-    1. Finds all available offices on the main list.
-    2. Clicks into each available office.
-    3. Calls helper to scrape dates from the office detail page.
-    4. Navigates back to the main office list.
-
-    Args:
-        driver: The Selenium WebDriver instance.
-
-    Returns:
-        A set of strings, where each string represents a unique available
-        appointment (e.g., "Office Name -YYYY-MM-DD") across all offices.
-    """
     all_found_appointments = set()
     today = datetime.date.today()
     end_date_filter = today + datetime.timedelta(days=100) #Testing farther out for refinement CHANGE LATER
@@ -233,7 +215,7 @@ def get_available_appointments(driver):
     return all_found_appointments
 
 
-# --- Main Logic ---
+# Main Logic
 def run_monitor():
     driver = None
     try:
@@ -327,8 +309,6 @@ def run_monitor():
                 print("Selected 'New driver over 18, new N.C. resident, REAL ID'.")
                 time.sleep(3)
 
-
-                # --- Call the main scraping orchestrator ---
                 found_appointments = get_available_appointments(driver)
                 current_appointments.update(found_appointments)
 
@@ -359,8 +339,8 @@ def run_monitor():
                 time.sleep(5)
                 continue
 
-            print(f"Waiting for 60 seconds before next check...")
-            time.sleep(60)
+            print(f"Waiting for 10 seconds before next check...")
+            time.sleep(10)
 
     except KeyboardInterrupt:
         print("\nMonitor stopped by user (Ctrl+C).")
@@ -371,7 +351,6 @@ def run_monitor():
             print("Closing Selenium WebDriver.")
             driver.quit()
 
-# --- Entry Point ---
 if __name__ == "__main__":
     print("Starting NC DMV appointment monitor (Debug Mode - Terminal Output).")
     run_monitor()
