@@ -14,10 +14,11 @@ import requests
 # Configuration
 DMV_URL = "https://skiptheline.ncdot.gov/Webapp/Appointment/Index/a7ade79b-996d-4971-8766-97feb75254de"
 LAST_APPOINTMENTS_FILE = "last_appointments.json"
+NUMBER_OF_DAYS = input("Input how many days ahead you want to include in search:")
 
 # Telegram Bot Configuration 
 TELEGRAM_BOT_TOKEN = "7791462398:AAFRLYcVdhhrYefpUJwS7IDCV-2WKKJ_upY" 
-TELEGRAM_CHAT_ID = "7368939375"
+TELEGRAM_CHAT_ID = input("Input your Telegram Chat ID:")
 
 # Notification Function (for Telegram) 
 def send_telegram_notification(subject, body, parse_mode=None):
@@ -82,7 +83,7 @@ def scrape_dates_from_office_detail_page(driver, office_name, end_date_filter):
 def get_available_appointments(driver):
     all_found_appointments = set()
     today = datetime.date.today()
-    end_date_filter = today + datetime.timedelta(days=30)
+    end_date_filter = today + datetime.timedelta(days=NUMBER_OF_DAYS)
     try:
         WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.CSS_SELECTOR, "div.step-control-content.UnitIdList")))
         print("Main office list loaded for iteration.")

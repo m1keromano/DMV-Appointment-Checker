@@ -5,7 +5,7 @@ import os
 
 # --- Telegram Bot Configuration ---
 TELEGRAM_BOT_TOKEN = "7791462398:AAFRLYcVdhhrYefpUJwS7IDCV-2WKKJ_upY"
-TELEGRAM_CHAT_ID = "7368939375"
+TELEGRAM_CHAT_ID = input("Input your Telegram Chat ID:")
 
 def send_telegram_message(message_text,  parse_mode=None): 
     api_url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
