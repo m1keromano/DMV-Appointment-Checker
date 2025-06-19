@@ -14,7 +14,7 @@ import requests
 # Configuration
 DMV_URL = "https://skiptheline.ncdot.gov/Webapp/Appointment/Index/a7ade79b-996d-4971-8766-97feb75254de"
 LAST_APPOINTMENTS_FILE = "last_appointments.json"
-NUMBER_OF_DAYS = input("Input how many days ahead you want to include in search:")
+NUMBER_OF_DAYS = int(input("Input how many days ahead you want to include in search:"))
 
 # Telegram Bot Configuration 
 TELEGRAM_BOT_TOKEN = "7791462398:AAFRLYcVdhhrYefpUJwS7IDCV-2WKKJ_upY" 
